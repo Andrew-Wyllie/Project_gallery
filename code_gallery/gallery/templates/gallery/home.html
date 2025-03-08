@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="text-center mb-5">My Coding Portfolio</h1>
+
+    {% for category in categories %}
+        <div class="mb-5">
+            <h2 class="category-header pb-2 mb-4">{{ category.name }}</h2>
+            
+            {% if category.projects %}
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for project in category.projects %}
+                        <div class="col">
+                            <div class="card h-100 project-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ project.title }}</h5>
+                                    <p class="card-text">{{ project.description|truncatewords:20 }}</p>
+                                </div>
+                                <div class="card-footer bg-transparent d-flex justify-content-between">
+                                    <a href="/project/{{ project.pk }}/" class="btn btn-primary btn-sm">View Details</a>
+                                    {% if project.github_link %}
+                                        <a href="{{ project.github_link }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                            GitHub
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer text-muted small">
+                                    Created: {{ project.created_at|date:"M d, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted text-center">No projects in this category yet.</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endblock %}

@@ -31,6 +31,14 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # or os.path.join(BASE_DIR, 'staticfiles')
 
+# Add these lines to your settings.py
+
+# URL to redirect to for login (if you're not ready to implement login yet)
+LOGIN_URL = '/'  # Redirect to homepage instead of showing an error
+
+# After login, redirect here
+LOGIN_REDIRECT_URL = '/'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -53,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gallery.apps.GalleryConfig',
+    #'widget_tweaks',
 ]
 
 MIDDLEWARE = [

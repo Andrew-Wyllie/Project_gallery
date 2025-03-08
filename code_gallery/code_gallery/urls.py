@@ -1,23 +1,8 @@
-"""
-URL configuration for code_gallery project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 from gallery import views  # Import views directly from the gallery app
 
 urlpatterns = [
@@ -28,13 +13,19 @@ urlpatterns = [
     path('', views.home_view, name='home'),
     
     # Project-related URLs
-    #path('project/add/', views.add_project, name='add_project'),
-    #path('project/<int:pk>/', views.project_detail, name='project_detail'),
+    path('project/add_project/', views.add_project, name='add_project'),
+    path('project/<int:pk>/', views.project_detail, name='project_detail'),
+    
+    # Folder management URLs
+    path('project/<int:project_pk>/create-folder/', views.create_folder, name='create_folder'),
+    path('folder/<int:folder_pk>/', views.folder_detail, name='folder_detail'),
     
     # File upload URLs
-    #path('project/<int:project_pk>/upload/', 
-     #    views.upload_project_file, 
-      #   name='upload_project_file'),
+    path('project/<int:project_pk>/upload/', views.upload_project_file, name='upload_project_file'),
+
+    # Authentication URLs
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='gallery/login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
 ]
 
 # Add media file serving in development

@@ -21,21 +21,44 @@ class Project(models.Model):
     def __str__(self):
         return self.title
 
-# class Project(models.Model):
-#     CATEGORY_CHOICES = [
-#         ('web', 'Web Development'),
-#         ('data', 'Data Science'),
-#         ('mobile', 'Mobile Development'),
-#         ('backend', 'Backend Engineering'),
-#         ('frontend', 'Frontend Development'),
-#         ('other', 'Other')
-#     ]
+class ProjectFolder(models.Model):
+    """
+    Model to represent folders within a project
+    """
+    name = models.CharField(max_length=100)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='folders')
+    parent_folder = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subfolders')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     title = models.CharField(max_length=200)
-#     description = models.TextField()
-#     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
-#     github_link = models.URLField(blank=True, null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        unique_together = ('name', 'project', 'parent_folder')
+        ordering = ['name']
+
+class ProjectFile(models.Model):
+    """
+    Model of each file within a project or folder
+    """
+    file = models.FileField(upload_to='project_files/')
+    description = models.TextField(blank=True)
+    filename = models.CharField(max_length=255)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='files')
+    folder = models.ForeignKey(ProjectFolder, on_delete=models.CASCADE, null=True, blank=True, related_name='files')
+    upload_date = models.DateTimeField(auto_now_add=True)
+    file_size = models.IntegerField(default=0)  # Size in bytes
     
-#     def __str__(self):
-#         return self.title
+    def __str__(self):
+        return self.filename
+    
+    def save(self, *args, **kwargs):
+        # Auto-set filename from the uploaded file if not provided
+        if not self.filename and self.file:
+            self.filename = self.file.name.split('/')[-1]
+        
+        # Set file size if file is present
+        if self.file and hasattr(self.file, 'size'):
+            self.file_size = self.file.size
+            
+        super().save(*args, **kwargs)

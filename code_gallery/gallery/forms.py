@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, ProjectFile, ProjectFolder
+from .models import Project
 
 class ProjectForm(forms.ModelForm):
     """
@@ -12,34 +12,38 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
         }
 
-class ProjectFolderForm(forms.ModelForm):
-    """
-    Form for creating folders within a project
-    """
-    class Meta:
-        model = ProjectFolder
-        fields = ['name', 'parent_folder']
+class ProjectWithFolderForm(forms.Form):
+    # Project fields
+    title = forms.CharField(max_length=200)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}))
+    category = forms.ChoiceField(choices=Project.CATEGORY_CHOICES)
+    github_link = forms.URLField(required=False)
+    image = forms.ImageField(required=False)
+    
+    # Folder fields
+    create_folder = forms.BooleanField(required=False, initial=False, 
+                                      label="Create a root folder for this project")
+    folder_name = forms.CharField(max_length=100, required=False, 
+                                 label="Folder name (if creating a folder)")
+    
+    # Folder upload option
+    upload_folder = forms.BooleanField(required=False, initial=False,
+                                      label="Upload an existing folder")
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        create_folder = cleaned_data.get('create_folder')
+        folder_name = cleaned_data.get('folder_name')
+        upload_folder = cleaned_data.get('upload_folder')
         
-    def __init__(self, *args, project=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if project:
-            # Only show folders from the current project
-            self.fields['parent_folder'].queryset = ProjectFolder.objects.filter(project=project)
-            # Add an empty label for the parent folder dropdown
-            self.fields['parent_folder'].empty_label = "No parent folder (root level)"
-
-class ProjectFileForm(forms.ModelForm):
-    """
-    Form for uploading project files
-    """
-    class Meta:
-        model = ProjectFile
-        fields = ['file', 'description', 'folder']
+        if create_folder and upload_folder:
+            raise forms.ValidationError(
+                "You can either create a new folder or upload an existing one, not both."
+            )
         
-    def __init__(self, *args, project=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        if project:
-            # Only show folders from the current project
-            self.fields['folder'].queryset = ProjectFolder.objects.filter(project=project)
-            # Add an empty label for the folder dropdown
-            self.fields['folder'].empty_label = "No folder (project root)"
+        if create_folder and not folder_name:
+            raise forms.ValidationError(
+                "Folder name is required when creating a folder."
+            )
+        
+        return cleaned_data

@@ -17,6 +17,7 @@ class Project(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='other')
     github_link = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='project_images/', blank=True, null=True)
     
     def __str__(self):
         return self.title
@@ -28,7 +29,6 @@ class ProjectFolder(models.Model):
     name = models.CharField(max_length=100)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='folders')
     parent_folder = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subfolders')
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name

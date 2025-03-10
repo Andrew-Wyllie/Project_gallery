@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="project-container">
+    <div class="project-header">
+        <h1>{{ project.title }}</h1>
+        <div class="project-meta">
+            <span class="category-badge">{{ project.get_category_display }}</span>
+            {% if project.github_link %}
+            <a href="{{ project.github_link }}" target="_blank" class="github-link">
+                <i class="fab fa-github"></i> View on GitHub
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="project-content">
+        <!-- Project Image Section -->
+        <div class="project-image">
+            {% if project.image %}
+            <img src="{{ project.image.url }}" alt="{{ project.title }}" class="main-image">
+            {% else %}
+            <div class="placeholder-image">
+                <i class="fas fa-code"></i>
+                <p>No image available</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Project Description -->
+        <div class="project-description">
+            <h2>Description</h2>
+            <div class="description-content">
+                {{ project.description|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Project Files and Folders Section -->
+        <div class="project-files">
+            <h2>Project Files</h2>
+            
+            {% if root_folders or root_files %}
+                <!-- Root level folders -->
+                {% if root_folders %}
+                <div class="folders-section">
+                    <h3>Folders</h3>
+                    <div class="folder-grid">
+                        {% for folder in root_folders %}
+                        <div class="folder-item">
+                            <a href="{% url 'folder_detail' folder_pk=folder.pk %}" class="folder-link">
+                                <i class="fas fa-folder"></i>
+                                <span class="folder-name">{{ folder.name }}</span>
+                            </a>
+                            <div class="folder-actions">
+                                <a href="{% url 'download_folder' folder_pk=folder.pk %}" class="download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Root level files -->
+                {% if root_files %}
+                <div class="files-section">
+                    <h3>Files</h3>
+                    <div class="file-list">
+                        {% for file in root_files %}
+                        <div class="file-item">
+                            <div class="file-info">
+                                <i class="fas fa-file"></i>
+                                <span class="file-name">{{ file.filename }}</span>
+                                <span class="file-size">({{ file.file_size|filesizeformat }})</span>
+                            </div>
+                            <div class="file-actions">
+                                <a href="{{ file.file.url }}" download class="download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-files-message">
+                    <p>No files or folders have been added to this project yet.</p>
+                </div>
+            {% endif %}
+            
+            <!-- Download all files as ZIP -->
+            {% if root_folders or root_files %}
+            <div class="download-all-section">
+                <a href="{% url 'download_project' project_pk=project.pk %}" class="download-all-btn">
+                    <i class="fas fa-download"></i> Download Entire Project
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .project-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .project-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+    
+    .project-header h1 {
+        margin-bottom: 10px;
+        font-size: 2.5rem;
+    }
+    
+    .project-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .category-badge {
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .github-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .github-link:hover {
+        text-decoration: underline;
+    }
+    
+    .project-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    /* Project Image Styles */
+    .project-image {
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .main-image {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    .placeholder-image {
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #f5f5f5;
+        color: #aaa;
+    }
+    
+    .placeholder-image i {
+        font-size: 4rem;
+        margin-bottom: 10px;
+    }
+    
+    /* Description Styles */
+    .project-description {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .project-description h2 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+        color: #333;
+    }
+    
+    .description-content {
+        line-height: 1.6;
+    }
+    
+    /* Files and Folders Section */
+    .project-files {
+        margin-top: 20px;
+    }
+    
+    .project-files h2 {
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+    }
+    
+    .project-files h3 {
+        margin: 15px 0;
+        font-size: 1.2rem;
+        color: #555;
+    }
+    
+    .folder-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .folder-item {
+        background-color: #f5f5f5;
+        border-radius: 6px;
+        padding: 15px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .folder-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .folder-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #333;
+        text-decoration: none;
+        margin-bottom: 10px;
+    }
+    
+    .folder-link i {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+    
+    .folder-name {
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .folder-actions {
+        margin-top: 10px;
+    }
+    
+    .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #f5f5f5;
+        border-radius: 6px;
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .file-info i {
+        color: #2196f3;
+        font-size: 1.1rem;
+    }
+    
+    .file-size {
+        color: #777;
+        font-size: 0.85rem;
+    }
+    
+    .download-btn, .download-all-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background-color: #4caf50;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+    }
+    
+    .download-btn:hover, .download-all-btn:hover {
+        background-color: #3d8b40;
+    }
+    
+    .download-all-section {
+        margin-top: 30px;
+        text-align: center;
+    }
+    
+    .download-all-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .no-files-message {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        text-align: center;
+        color: #777;
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+        .project-content {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .project-description, .project-files {
+            grid-column: span 2;
+        }
+    }
+</style>
+{% endblock %}

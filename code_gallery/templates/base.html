@@ -69,13 +69,32 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="/">Home</a>
                         </li>
+                        {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="project/add_project/">Add Project</a>
+                            <a class="nav-link" href="{% url 'add_project' %}">Add Project</a>
                         </li>
+                        {% endif %}
+                    </ul>
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <span class="nav-link text-light">Welcome, {{ user.username }}</span>
+                            </li>
+                            <li class="nav-item">
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="nav-link btn btn-outline-light btn-sm ms-2">Logout</button>
+                                </form>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-outline-light btn-sm" href="{% url 'login' %}">Login</a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>

@@ -16,16 +16,14 @@ urlpatterns = [
     path('project/add_project/', views.add_project, name='add_project'),
     path('project/<int:pk>/', views.project_detail, name='project_detail'),
     
-    # Folder management URLs
-    path('project/<int:project_pk>/create-folder/', views.create_folder, name='create_folder'),
-    path('folder/<int:folder_pk>/', views.folder_detail, name='folder_detail'),
-    
-    # File upload URLs
-    path('project/<int:project_pk>/upload/', views.upload_project_file, name='upload_project_file'),
-
     # Authentication URLs
     path('accounts/login/', auth_views.LoginView.as_view(template_name='gallery/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+
+    path('folder/<int:folder_pk>/download/', views.download_folder, name='download_folder'),
+    path('project/<int:project_pk>/download/', views.download_project, name='download_project'),
+
+    path('folder/<int:folder_pk>/', views.folder_detail, name='folder_detail'),
 ]
 
 # Add media file serving in development

@@ -254,3 +254,47 @@ def folder_detail(request, folder_pk):
         'subfolders': subfolders
     }
     return render(request, 'gallery/folder_detail.html', context)
+
+@login_required
+def delete_project(request, pk):
+    """
+    View to delete an existing project and all associated files/folders
+    """
+    # Find the project
+    project = get_object_or_404(Project, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            # Debug - print before deletion
+            print(f"Attempting to delete project: {project.title} (ID: {project.pk})")
+            
+            # Store the project title for confirmation message
+            project_title = project.title
+            
+            # Delete the project
+            project.delete()
+            
+            # Debug - print after deletion
+            print(f"Project {project_title} deletion executed")
+            
+            messages.success(request, f'Project "{project_title}" has been deleted successfully')
+            return render(request, 'gallery/home.html')
+        except Exception as e:
+            # Catch any errors that might occur
+            print(f"Error deleting project: {str(e)}")
+            messages.error(request, f'Error deleting project: {str(e)}')
+            return render(request, 'gallery/home.html')
+        
+    context = {
+    'categories': [
+        {
+            'key': category_key,
+            'name': category_name,
+            'projects': Project.objects.filter(category=category_key)
+        }
+        for category_key, category_name in Project.CATEGORY_CHOICES
+    ]
+    }
+    
+    # If GET request, redirect to home
+    return render(request, 'gallery/home.html', context=context)

@@ -22,7 +22,7 @@ urlpatterns = [
 
     path('folder/<int:folder_pk>/download/', views.download_folder, name='download_folder'),
     path('project/<int:project_pk>/download/', views.download_project, name='download_project'),
-
+    path('project/<int:pk>/delete/', views.delete_project, name='delete_project'),
     path('folder/<int:folder_pk>/', views.folder_detail, name='folder_detail'),
 ]
 
